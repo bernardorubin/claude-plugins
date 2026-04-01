@@ -92,22 +92,87 @@ You can mix modes across runs. For example: run a full review first, then use `-
 
 ## Review Agents
 
-### Core Agents (always run)
+### Core Agents (always run in full mode)
 
-| Agent | Perspective | Focus Areas |
-|---|---|---|
-| **Security** | Think like an attacker | Injection, auth, data exposure, CSRF, breaking changes |
-| **Correctness** | Think like a QA engineer | Race conditions, null handling, logic errors, edge cases |
-| **Code Quality** | Think like a senior reviewer | TypeScript typing, SOLID, DRY, conventions, missing companion changes |
-| **Performance & UX** | Think like a user on slow connection | Re-renders, bundle size, a11y, dependency audit |
+**Agent 1 — Security** | *Think like an attacker*
+- Input validation and sanitization gaps
+- Injection vulnerabilities (SQL, XSS, command injection)
+- Authentication and authorization bypass opportunities
+- Sensitive data exposure (tokens, passwords, PII in logs)
+- CSRF, CORS, and header security misconfigurations
+- Insecure deserialization or eval usage
+- Breaking changes: searches for consumers of modified types, exports, and API signatures across the codebase and flags any that weren't updated
+
+**Agent 2 — Correctness** | *Think like a QA engineer*
+- Race conditions and concurrency issues
+- Null/undefined handling and type safety holes
+- Logic errors and off-by-one mistakes
+- Memory leaks and resource cleanup failures
+- State management bugs (stale closures, missing deps in React hooks)
+- Error propagation: are errors caught, surfaced, or silently swallowed?
+- Edge cases: empty arrays, zero values, undefined optional fields, boundary conditions
+
+**Agent 3 — Code Quality & Conventions** | *Think like a senior reviewer on the team*
+- TypeScript typing strictness (no `any`, proper interfaces)
+- SOLID principles compliance
+- DRY violations and unnecessary duplication
+- Naming conventions and readability
+- Project pattern adherence (reads your CLAUDE.md for project-specific conventions)
+- Test coverage gaps
+- Missing companion changes: sanity typegen not run, new env vars undocumented, server-to-client component conversions without loading/error states, changed shared types without updating consumers
+
+**Agent 4 — Performance & UX** | *Think like a user on a slow connection*
+- Unnecessary re-renders and missing memoization
+- Inefficient queries or data fetching patterns
+- Bundle size impact (distinguishes client vs server: server-only packages don't affect bundle)
+- Accessibility issues (ARIA attributes, keyboard navigation, screen readers)
+- Loading and error state handling gaps
+- Missing cleanup (event listeners, subscriptions, timers)
+- Dependency audit: if `package.json` changed, checks new packages for maintenance status, known vulnerabilities, and size; flags removed packages that might still be imported
 
 ### Specialist Agents (triggered automatically when relevant)
 
-| Agent | Triggers when | Focus |
-|---|---|---|
-| **Silent Failure Hunter** | Diff contains try/catch, .catch(), fallback values | Error swallowing, missing propagation, logging gaps |
-| **Comment Accuracy** | Diff adds/modifies 5+ comment lines | Stale comments, contradictions, JSDoc mismatches |
-| **Type Design** | Diff introduces new type/interface definitions | Invalid state types, missing readonly, overly broad types |
+**Agent 5 — Silent Failure Hunter** | *Think like an oncall engineer paged at 3am*
+Triggers when the diff contains `try`/`catch`, `.catch()`, `|| fallback`, or error handling changes.
+- `catch` blocks that swallow errors (empty catch, catch with only `console.log`)
+- Fallback values that mask failures (defaults that hide broken state)
+- Missing error propagation (async functions that don't await or handle rejections)
+- Logging gaps: errors caught but not logged, or logged at wrong severity
+- Retry logic without backoff or max attempts
+- Status checks that return success even on partial failure
+
+**Agent 6 — Comment Accuracy** | *Think like a developer reading this code 6 months from now*
+Triggers when the diff adds or modifies 5+ comment lines.
+- Comments that contradict the code they describe
+- Stale comments referencing removed/renamed variables, functions, or logic
+- TODO/FIXME/HACK comments without context or tracking
+- Over-commenting (restating what the code clearly does)
+- Under-commenting (complex logic with no explanation)
+- JSDoc/docstring parameter mismatches (wrong types, missing params, extra params)
+
+**Agent 7 — Type Design** | *Think like a library author*
+Triggers when the diff introduces new `type` or `interface` definitions.
+- Types that allow invalid states (e.g., `status: string` instead of a union)
+- Missing `readonly` modifiers on immutable data
+- Overly broad types (`any`, `object`, `Record<string, unknown>`) where narrower types are possible
+- Discriminated unions that should be used but aren't
+- Types that don't enforce their business rules (e.g., email as `string` vs branded type)
+- Exported types that leak implementation details
+
+### Lite Mode Agents
+
+In `--lite` mode, the 4 core agents are consolidated into 2 for speed:
+
+**Agent A — Security & Correctness**: Combines Agent 1 + Agent 2 focus areas, reviews from diff only
+**Agent B — Quality & Performance**: Combines Agent 3 + Agent 4 focus areas, reviews from diff only
+
+Specialist agents (5, 6, 7) still trigger in lite mode when relevant.
+
+## How It Compares
+
+`/pr-review` vs Anthropic's built-in `review-pr` toolkit:
+
+![Comparison](comparison.png)
 
 ## Confidence Scoring
 
