@@ -1,0 +1,21 @@
+{
+  "name": "bernardorubin-tools",
+  "owner": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by Bernardo Rubin"
+  },
+  "plugins": [
+    {
+      "name": "pr-review",
+      "source": "./plugins/pr-review",
+      "description": "PR review with parallel agents, confidence-based filtering, incremental tracking, and file output. General-purpose, optimized for TypeScript/JavaScript.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Bernardo Rubin"
+      }
+    }
+  ]
+}
