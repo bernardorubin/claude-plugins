@@ -60,17 +60,17 @@ The skill uses whatever model you're currently running in Claude Code. It does n
 
 This skill is designed for iterative use, not just one-shot reviews.
 
-### Recommended workflow
+### How it works
 
 ```
-1. Run /pr-review              → Full review with all agents, get initial issues
-2. Fix the flagged issues       → Make code changes
-3. Run /pr-review --lite        → Quick re-check, resolved issues marked ✅ Fixed,
-                                  new issues surfaced with fewer tokens
-4. Repeat with --lite           → Until the review is clean
+1. Run /pr-review          → Initial review, issues identified
+2. Fix the flagged issues   → Make code changes
+3. Run /pr-review again     → Resolved issues marked ✅ Fixed (strikethrough),
+                              new issues from your fixes surfaced
+4. Repeat                   → Until the review is clean
 ```
 
-Start with a full review to get thorough coverage, then use `--lite` for subsequent passes. The lite re-checks are faster and use significantly fewer tokens since they read from the diff only and run 2 agents instead of 7. The incremental tracking works the same either way — both modes write to the same file.
+> **Tip:** Using `--lite` for subsequent passes after the initial full review is a good way to save tokens. The lite re-checks run 2 agents instead of 7 and read from the diff only, while the incremental tracking works the same either way.
 
 ### What happens on re-runs
 
