@@ -1,6 +1,6 @@
 # br-tools
 
-Bernardo's Claude Code toolkit — 6 slash commands and 4 skills for PR reviews, git workflow, Claude meta tasks, and external integrations.
+Bernardo's Claude Code toolkit — 6 slash commands, 4 skills, and 1 subagent for PR reviews, git workflow, Claude meta tasks, code audits, and external integrations.
 
 ## Installation
 
@@ -10,10 +10,11 @@ Bernardo's Claude Code toolkit — 6 slash commands and 4 skills for PR reviews,
 /reload-plugins
 ```
 
-## Commands vs Skills
+## Commands, skills, and agents
 
 - **Commands** (`/br-tools:<name>`) only fire when you explicitly type the slash command. Use them for actions you want full control over.
 - **Skills** (`/<name>`) appear in the slash palette without the `br-tools:` prefix and **also auto-trigger** on natural language. Use them for tasks you'd happily ask for in plain English.
+- **Subagents** (`br-tools:<name>`) are invoked via the Task tool — typically by Claude during a larger task — to do focused work in their own context window with their own model.
 
 ## Commands
 
@@ -172,6 +173,22 @@ Reviews saved as `pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` containing:
 `pr-review` vs Anthropic's built-in `review-pr` toolkit:
 
 ![Comparison](comparison.png)
+
+## Subagents
+
+### `br-tools:code-audit`
+
+A focused review subagent for security, performance, bugs, and architectural compliance. Runs as a Task with its own model (Sonnet) and context window.
+
+**When it runs:** automatically after significant component changes, large refactors, or sessions touching multiple files. Can also be invoked explicitly when you want a thorough quality check.
+
+**What it covers:**
+- **Security** — XSS, injection (SQL/command/path), auth/authz gaps, hardcoded secrets, CSRF
+- **Performance** — N+1 queries, memory leaks (timers, listeners, subscriptions), excessive re-renders
+- **Bugs & correctness** — null/undefined handling, race conditions, error swallowing, edge cases
+- **Architecture** — SOLID compliance, project pattern adherence (reads CLAUDE.md), separation of concerns
+
+Output is actionable findings with `file:line` references — not abstract suggestions.
 
 ## License
 

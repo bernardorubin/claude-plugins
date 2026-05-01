@@ -1,6 +1,6 @@
 {
   "name": "br-tools",
-  "description": "Bernardo's Claude Code toolkit: confidence-scored PR reviews, git workflow shortcuts, PR/Slack helpers, Claude meta commands, and Jira integration. 6 slash commands and 4 skills.",
+  "description": "Bernardo's Claude Code toolkit: confidence-scored PR reviews, git workflow shortcuts, PR/Slack helpers, Claude meta commands, Jira integration, and a code-audit subagent. 6 slash commands, 4 skills, 1 agent.",
   "version": "1.0.0",
   "author": {
     "name": "Bernardo Rubin",

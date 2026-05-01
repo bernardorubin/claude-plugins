@@ -14,6 +14,7 @@ claude-plugins/
 │       │   └── plugin.json      # plugin manifest
 │       ├── commands/            # slash commands as .md files
 │       ├── skills/              # skill folders, each with SKILL.md
+│       ├── agents/              # subagents as .md files (frontmatter: name, description, model)
 │       ├── README.md            # user-facing plugin docs
 │       └── comparison.png       # asset referenced by README
 └── README.md                    # marketplace overview, install instructions
@@ -23,7 +24,7 @@ claude-plugins/
 
 - **Marketplace name**: `bernardorubin-tools` (set in `.claude-plugin/marketplace.json`)
 - **GitHub identifier**: `bernardorubin/claude-plugins` (used in `/plugin marketplace add`)
-- **Single plugin**: `br-tools` — bundles 6 slash commands + 4 skills (`pr-review`, `pr-description`, `write-slack-message`, `prd-to-jira`)
+- **Single plugin**: `br-tools` — bundles 6 slash commands, 4 skills (`pr-review`, `pr-description`, `write-slack-message`, `prd-to-jira`), and 1 subagent (`code-audit`)
 - **Install path** (after `/plugin install`): `~/.claude/plugins/cache/bernardorubin-tools/br-tools/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.
@@ -65,6 +66,21 @@ The command becomes invocable as `/br-tools:<name>` after install + `/reload-plu
 
 The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `br-tools:<name>`.
 
+## Adding a new subagent
+
+1. Create `plugins/br-tools/agents/<name>.md` with frontmatter:
+   ```
+   ---
+   name: <name>
+   description: <when this agent should run; can include "Should automatically run after..." for auto-dispatch>
+   model: sonnet  # or opus / haiku
+   ---
+   ```
+2. Body is the agent's system prompt — what it specializes in, how it should behave.
+3. Document in the Subagents section of both READMEs.
+
+The agent becomes invocable via the Task tool as `subagent_type: br-tools:<name>`.
+
 ## Conventions
 
 - **Naming**: keep command/skill names short and descriptive. They're prefixed with `br-tools:` automatically — no need for extra prefixes.
@@ -87,3 +103,13 @@ The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `
 3. On any machine that already has the marketplace: `/plugin marketplace update bernardorubin-tools` → `/plugin install br-tools@bernardorubin-tools` to pull updates.
 
 There is no app store, approval process, or release pipeline — pushing to `main` is publishing.
+
+## Related-but-not-plugin migration items
+
+Some of the user's tooling lives outside this marketplace and won't migrate via `/plugin install`. Track these separately when moving to a new machine:
+
+- `~/.local/bin/jira-curl` — wrapper script for Jira API calls. Sources credentials from `~/.config/jira/credentials` (NEVER commit this file — contains email + API token for both `happy` and `horizon` Jira instances).
+- `~/.config/jira/credentials` — sensitive; copy via secure transfer, not git.
+- `~/.claude/CLAUDE.md` — global user instructions (stack defaults, anti-patterns, post-edit quality rules).
+- `~/.claude/settings.json` — hooks (GitKrakenCLI integration) + permissions allowlist + env vars.
+- `~/.claude/bin/claude-notify` + `~/.claude/assets/claude-logo.png` — notification script and its asset.
