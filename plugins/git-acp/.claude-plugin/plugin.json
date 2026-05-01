@@ -1,0 +1,12 @@
+{
+  "name": "git-acp",
+  "description": "Stage all changes, generate a commit message from the diff, commit, and push to remote in one step.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}

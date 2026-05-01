@@ -1,0 +1,12 @@
+{
+  "name": "claude-modularize",
+  "description": "Break down a large, monolithic CLAUDE.md file into smaller, maintainable pieces distributed across the project's directory structure.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}

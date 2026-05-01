@@ -1,0 +1,12 @@
+{
+  "name": "write-slack-message",
+  "description": "Write a Slack message ready to copy-paste, with proper formatting and a business-casual tone.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}

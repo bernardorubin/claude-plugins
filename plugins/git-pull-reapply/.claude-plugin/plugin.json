@@ -1,0 +1,12 @@
+{
+  "name": "git-pull-reapply",
+  "description": "Bring the current branch up to date with remote while preserving local work — handles clean trees, uncommitted changes, and divergent branches via stash and rebase.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}

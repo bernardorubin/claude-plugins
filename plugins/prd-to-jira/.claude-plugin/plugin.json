@@ -1,0 +1,12 @@
+{
+  "name": "prd-to-jira",
+  "description": "Break down a PRD, spec, or feature document into a Jira epic with well-structured, right-sized tickets organized by work area. Includes both the slash command and the underlying skill.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}

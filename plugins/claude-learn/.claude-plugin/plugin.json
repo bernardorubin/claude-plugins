@@ -1,0 +1,12 @@
+{
+  "name": "claude-learn",
+  "description": "Review the current session and document valuable learnings to CLAUDE.md files, making future Claude sessions smarter.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}

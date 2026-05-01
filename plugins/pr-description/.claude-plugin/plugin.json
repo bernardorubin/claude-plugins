@@ -1,0 +1,12 @@
+{
+  "name": "pr-description",
+  "description": "Generate a GitHub-ready PR description from the diff and update the PR directly on GitHub. Falls back to saving to Desktop if the GitHub update fails.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}
