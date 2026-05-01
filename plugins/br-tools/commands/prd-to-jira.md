@@ -8,4 +8,4 @@ Break down a PRD into Jira tickets. Invoke the `prd-to-jira` skill to decompose 
 
 ## Instructions
 
-Use the Skill tool to invoke `prd-to-jira`, then follow its workflow. If $PRD_SOURCE is provided, ingest it first. Otherwise ask the user to paste or share the PRD.
+Use the Skill tool to invoke `br-tools:prd-to-jira`, then follow its workflow. If $PRD_SOURCE is provided, ingest it first. Otherwise ask the user to paste or share the PRD.
