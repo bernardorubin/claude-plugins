@@ -178,7 +178,7 @@ Reviews saved as `pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` containing:
 
 ### `br-tools:code-audit`
 
-A focused review subagent for security, performance, bugs, and architectural compliance. Runs as a Task with its own model (Sonnet) and context window.
+A focused review subagent for security, performance, bugs, and architectural compliance. Runs as a Task with its own context window, inheriting your active model.
 
 **When it runs:** automatically after significant component changes, large refactors, or sessions touching multiple files. Can also be invoked explicitly when you want a thorough quality check.
 

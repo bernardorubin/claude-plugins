@@ -73,7 +73,7 @@ The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `
    ---
    name: <name>
    description: <when this agent should run; can include "Should automatically run after..." for auto-dispatch>
-   model: sonnet  # or opus / haiku
+   # Optional: model: sonnet | opus | haiku — only set if the agent specifically benefits from a fixed model. Default is to inherit the user's active model.
    ---
    ```
 2. Body is the agent's system prompt — what it specializes in, how it should behave.
