@@ -1,6 +1,6 @@
 # br-tools
 
-Bernardo's Claude Code toolkit — 8 slash commands and 2 skills for PR reviews, git workflow, Claude meta tasks, and external integrations.
+Bernardo's Claude Code toolkit — 6 slash commands and 4 skills for PR reviews, git workflow, Claude meta tasks, and external integrations.
 
 ## Installation
 
@@ -9,6 +9,11 @@ Bernardo's Claude Code toolkit — 8 slash commands and 2 skills for PR reviews,
 /plugin install br-tools@bernardorubin-tools
 /reload-plugins
 ```
+
+## Commands vs Skills
+
+- **Commands** (`/br-tools:<name>`) only fire when you explicitly type the slash command. Use them for actions you want full control over.
+- **Skills** (`/<name>`) appear in the slash palette without the `br-tools:` prefix and **also auto-trigger** on natural language. Use them for tasks you'd happily ask for in plain English.
 
 ## Commands
 
@@ -26,17 +31,6 @@ Bring the current branch up to date with remote while preserving local work. Han
 
 Always rebases over merging so history stays linear.
 
-### GitHub
-
-#### `/br-tools:pr-description`
-Generates a GitHub-ready PR description from the diff and updates the PR directly via `gh`. Falls back to saving to `~/Desktop` if the GitHub update fails.
-
-```
-/br-tools:pr-description              # Auto-detect PR from current branch
-/br-tools:pr-description 463          # Specific PR by number
-/br-tools:pr-description <pr-url>     # Specific PR by URL
-```
-
 ### Claude meta
 
 #### `/br-tools:claude-learn`
@@ -53,7 +47,7 @@ Breaks down a large, monolithic CLAUDE.md into smaller, scoped files distributed
 ### Integrations
 
 #### `/br-tools:prd-to-jira`
-Breaks down a PRD, spec, or feature document into a Jira epic with well-structured, right-sized tickets organized by work area. Backed by the bundled `prd-to-jira` skill.
+Breaks down a PRD, spec, or feature document into a Jira epic with well-structured, right-sized tickets organized by work area. Backed by the `prd-to-jira` skill — typing the slash command runs the same workflow, but the skill auto-triggers when you share a PRD in conversation.
 
 ```
 /br-tools:prd-to-jira                          # Expects PRD pasted in conversation
@@ -68,12 +62,24 @@ Logs the current session's work into a monthly worklog file on the Desktop (e.g.
 /br-tools:save-session-to-worklog --project happy       # Force project name
 ```
 
-#### `/br-tools:write-slack-message`
-Drafts a Slack message ready to copy-paste, with proper formatting and a business-casual tone. Asks for context if invoked with no arguments.
-
 ## Skills
 
-### `br-tools:pr-review` — Confidence-scored PR reviews
+### `/pr-description`
+Generates a GitHub-ready PR description from the diff and updates the PR directly via `gh`. Falls back to saving to `~/Desktop/pr-description.md` if the GitHub update fails. Auto-triggers on phrases like "write a PR description", "draft the PR body", "update the PR".
+
+```
+/pr-description              # Auto-detect PR from current branch
+/pr-description 463          # Specific PR by number
+/pr-description <pr-url>     # Specific PR by URL
+```
+
+### `/write-slack-message`
+Drafts a Slack message ready to copy-paste, with proper formatting and a business-casual tone. Saves to `~/Desktop/slack-message.md`. Auto-triggers on phrases like "draft a slack message", "how should I phrase this for slack", "write up a slack post".
+
+### `/prd-to-jira`
+PRD breakdown into a Jira epic — same workflow as the slash command above, but auto-triggers when you share a PRD, ask to "create tickets", "break this down", "make Jira tasks", etc.
+
+### `/pr-review` — Confidence-scored PR reviews
 
 Runs multiple focused review agents in parallel, each examining your PR from a different angle (security, correctness, code quality, performance). Findings are scored on a 0-100 confidence scale, and only issues scoring 80+ are surfaced — cutting noise while catching real problems. Results are saved to a markdown file you can share, reference later, or track progress against as you fix issues.
 
@@ -81,7 +87,7 @@ Runs multiple focused review agents in parallel, each examining your PR from a d
 
 #### Usage
 
-The `pr-review` skill is invoked via the Skill tool — typically by asking Claude to review a PR. Examples:
+Auto-triggers when you ask Claude to review a PR. Examples:
 
 ```
 review PR #463
@@ -166,10 +172,6 @@ Reviews saved as `pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` containing:
 `pr-review` vs Anthropic's built-in `review-pr` toolkit:
 
 ![Comparison](comparison.png)
-
-### `br-tools:prd-to-jira`
-
-Same scope as the `/br-tools:prd-to-jira` slash command but invocable via the Skill tool — triggered automatically when the user shares a PRD, asks to "create tickets", "break this down", "make Jira tasks", etc.
 
 ## License
 

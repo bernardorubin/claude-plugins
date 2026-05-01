@@ -23,17 +23,31 @@ claude-plugins/
 
 - **Marketplace name**: `bernardorubin-tools` (set in `.claude-plugin/marketplace.json`)
 - **GitHub identifier**: `bernardorubin/claude-plugins` (used in `/plugin marketplace add`)
-- **Single plugin**: `br-tools` — bundles 8 commands + 2 skills (`pr-review`, `prd-to-jira`)
+- **Single plugin**: `br-tools` — bundles 6 slash commands + 4 skills (`pr-review`, `pr-description`, `write-slack-message`, `prd-to-jira`)
 - **Install path** (after `/plugin install`): `~/.claude/plugins/cache/bernardorubin-tools/br-tools/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.
 
+## Commands vs skills — when to use which
+
+This is the most important decision when adding something new:
+
+| | Slash palette display | How invoked |
+|---|---|---|
+| **Command** (`commands/foo.md`) | `/br-tools:foo` (always namespaced) | Only when user explicitly types it |
+| **Skill** (`skills/foo/SKILL.md`) | `/foo` (no prefix) | User types it **OR** Claude auto-triggers based on `description` |
+
+**Pick a command when**: the action is destructive, opinionated, or has wide blast radius (e.g. `git-acp` stages and pushes everything; `save-session-to-worklog` writes to disk under a guessed project name). Explicit invocation prevents accidents.
+
+**Pick a skill when**: the user would naturally ask for the action in plain English, and auto-triggering is helpful rather than risky (e.g. "draft a PR description", "write a slack message about X"). Skills feel cleaner in the slash palette since they don't have the `br-tools:` prefix.
+
+**The `description` field in a skill is load-bearing** — it's what Claude matches against the user's natural language. Narrow descriptions prevent over-triggering. Include explicit trigger phrases ("Triggers on phrases like ...") for skills you want to be eager.
+
 ## Adding a new command
 
 1. Create `plugins/br-tools/commands/<name>.md` — first line `# Title`, then a description and instructions. No frontmatter required for commands.
-2. Add a row to the command table in `plugins/br-tools/README.md`.
-3. Add a row to the command table in the root `README.md`.
-4. Commit + push. Users run `/plugin marketplace update bernardorubin-tools` then `/plugin install br-tools@bernardorubin-tools` to refresh.
+2. Add a row to the Commands table in `plugins/br-tools/README.md` and the root `README.md`.
+3. Commit + push. Users run `/plugin marketplace update bernardorubin-tools` then `/plugin install br-tools@bernardorubin-tools` to refresh.
 
 The command becomes invocable as `/br-tools:<name>` after install + `/reload-plugins`.
 
@@ -43,13 +57,13 @@ The command becomes invocable as `/br-tools:<name>` after install + `/reload-plu
    ```
    ---
    name: <name>
-   description: <one-line description that drives auto-trigger>
+   description: <description that drives auto-trigger — include explicit trigger phrases>
    ---
    ```
 2. Optionally add `evals/`, `references/`, etc. as siblings of `SKILL.md`.
-3. Document in `plugins/br-tools/README.md` under "Skills" and in the root README's skills table.
+3. Document in the Skills section of `plugins/br-tools/README.md` and the root `README.md`.
 
-The skill becomes available as `br-tools:<name>` for the Skill tool.
+The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `br-tools:<name>`.
 
 ## Conventions
 

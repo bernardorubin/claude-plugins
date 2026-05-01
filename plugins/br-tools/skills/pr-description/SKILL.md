@@ -1,10 +1,15 @@
+---
+name: pr-description
+description: Use when the user asks to generate, write, draft, or update a pull request description on GitHub. Triggers on phrases like "write a PR description", "draft the PR body", "update the PR description", "fill in the PR", or "generate description for PR <number>". Operates on the current branch's PR by default, or one specified by number/URL. Updates the PR directly via `gh pr edit`, falls back to ~/Desktop/pr-description.md if the GitHub update fails.
+---
+
 # Generate PR Description
 
 Generate a GitHub-ready PR description and update the PR directly on GitHub. Falls back to saving to Desktop if the GitHub update fails.
 
 ## Arguments
 
-`$ARGUMENTS` - Optional PR number or URL (e.g., `463` or `https://github.com/org/repo/pull/463`)
+Optional PR number or URL (e.g., `463` or `https://github.com/org/repo/pull/463`). If no PR is specified, auto-detect from the current branch.
 
 ## Instructions
 
@@ -12,7 +17,7 @@ Generate a GitHub-ready PR description and update the PR directly on GitHub. Fal
 
 Try these in order until one works:
 
-1. **If argument provided**: Run `gh pr view $ARGUMENTS --json title,number,url,commits,files,baseRefName,headRefName`
+1. **If a PR number/URL was provided**: Run `gh pr view <ARG> --json title,number,url,commits,files,baseRefName,headRefName`
 2. **If no argument**: Run `gh pr view --json title,number,url,commits,files,baseRefName,headRefName` (auto-detects current branch's PR)
 3. **If both fail**: Fall back to `git log` and `git diff --stat` against the base branch (usually `main` or `master`)
 
