@@ -31,18 +31,10 @@ Auto-trigger on natural language, also invocable as `/<name>` from the slash pal
 
 | Skill | Triggers on |
 |-------|-------------|
-| `/pr-review` | "review this PR", "run a PR review on #463" |
+| `/pr-review` | "review this PR", "review my uncommitted changes", "audit the whole repo" — three modes: PR / local / full-repo |
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |
 | `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" |
 | `/prd-to-jira` | "create tickets from this PRD", "break this down into jira tasks" |
-
-### Subagents
-
-Invoked via the Task tool, automatically or by request.
-
-| Agent | Purpose |
-|-------|---------|
-| `br-tools:code-audit` | Security / performance / bugs / SOLID compliance review. Run after features, large refactors, or significant component changes. |
 
 See [`plugins/br-tools/README.md`](plugins/br-tools/README.md) for full details on every command and skill, the PR review modes (full / lite), and the iterative review loop.
 

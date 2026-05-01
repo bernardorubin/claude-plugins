@@ -1,6 +1,6 @@
 # br-tools
 
-Bernardo's Claude Code toolkit — 6 slash commands, 4 skills, and 1 subagent for PR reviews, git workflow, Claude meta tasks, code audits, and external integrations.
+Bernardo's Claude Code toolkit — 6 slash commands and 4 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, and external integrations.
 
 ## Installation
 
@@ -10,11 +10,10 @@ Bernardo's Claude Code toolkit — 6 slash commands, 4 skills, and 1 subagent fo
 /reload-plugins
 ```
 
-## Commands, skills, and agents
+## Commands vs Skills
 
 - **Commands** (`/br-tools:<name>`) only fire when you explicitly type the slash command. Use them for actions you want full control over.
 - **Skills** (`/<name>`) appear in the slash palette without the `br-tools:` prefix and **also auto-trigger** on natural language. Use them for tasks you'd happily ask for in plain English.
-- **Subagents** (`br-tools:<name>`) are invoked via the Task tool — typically by Claude during a larger task — to do focused work in their own context window with their own model.
 
 ## Commands
 
@@ -80,22 +79,40 @@ Drafts a Slack message ready to copy-paste, with proper formatting and a busines
 ### `/prd-to-jira`
 PRD breakdown into a Jira epic — same workflow as the slash command above, but auto-triggers when you share a PRD, ask to "create tickets", "break this down", "make Jira tasks", etc.
 
-### `/pr-review` — Confidence-scored PR reviews
+### `/pr-review` — Confidence-scored code reviews (3 modes)
 
-Runs multiple focused review agents in parallel, each examining your PR from a different angle (security, correctness, code quality, performance). Findings are scored on a 0-100 confidence scale, and only issues scoring 80+ are surfaced — cutting noise while catching real problems. Results are saved to a markdown file you can share, reference later, or track progress against as you fix issues.
+Runs multiple focused review agents in parallel, each examining the code from a different angle (security, correctness, code quality, performance). Findings are scored on a 0-100 confidence scale, and only issues scoring 80+ are surfaced — cutting noise while catching real problems. Results are saved to a markdown file you can share, reference later, or track progress against as you fix issues.
 
 **Scope:** General-purpose, optimized for TypeScript/JavaScript projects. Works with any language but includes specialized checks for React, Next.js, and TypeScript codebases. Frontend-specific checks (re-renders, bundle size, accessibility) only fire when relevant to the changed files.
 
+#### The three modes
+
+| Mode | When | Input | Output filename |
+|------|------|-------|-----------------|
+| **PR** (default) | A PR number is given or auto-detected from the current branch | The PR's diff | `pr-review-{number}-{date}.md` |
+| **Local** | No PR exists, OR `--local` flag, OR you ask to "review my uncommitted work" / "review my branch" | `git diff origin/main...HEAD` + uncommitted | `pr-review-{branch}-{date}.md` |
+| **Full repo** | `--full-repo` flag, OR you ask for a "full repo audit" / "audit the whole codebase" | Every source file (with sensible exclusions) — confirms before running on >50 files | `code-audit-{repo}-{date}.md` |
+
 #### Usage
 
-Auto-triggers when you ask Claude to review a PR. Examples:
+Auto-triggers on natural language. Examples:
 
 ```
-review PR #463
-run a pr review                          # Auto-detect PR from current branch
-review PR 463 in lite mode               # Lightweight: fewer agents, diff-only
-review PR 463 inline                     # Output in conversation, no file
-review PR 463 to ~/reviews               # Custom output directory
+review PR #463                           → PR mode
+run a pr review                          → Auto-detect PR; falls back to local if none
+review PR 463 in lite mode               → Lightweight: fewer agents, diff-only
+review my uncommitted changes            → Local mode
+audit my branch                          → Local mode
+audit the whole repo                     → Full repo mode (asks to confirm if >50 files)
+do a full repo audit in lite mode        → Full repo + lite
+```
+
+Or invoke explicitly via slash with flags:
+
+```
+/pr-review --local
+/pr-review --full-repo
+/pr-review --full-repo --lite
 ```
 
 #### Modes
@@ -173,22 +190,6 @@ Reviews saved as `pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` containing:
 `pr-review` vs Anthropic's built-in `review-pr` toolkit:
 
 ![Comparison](comparison.png)
-
-## Subagents
-
-### `br-tools:code-audit`
-
-A focused review subagent for security, performance, bugs, and architectural compliance. Runs as a Task with its own context window, inheriting your active model.
-
-**When it runs:** automatically after significant component changes, large refactors, or sessions touching multiple files. Can also be invoked explicitly when you want a thorough quality check.
-
-**What it covers:**
-- **Security** — XSS, injection (SQL/command/path), auth/authz gaps, hardcoded secrets, CSRF
-- **Performance** — N+1 queries, memory leaks (timers, listeners, subscriptions), excessive re-renders
-- **Bugs & correctness** — null/undefined handling, race conditions, error swallowing, edge cases
-- **Architecture** — SOLID compliance, project pattern adherence (reads CLAUDE.md), separation of concerns
-
-Output is actionable findings with `file:line` references — not abstract suggestions.
 
 ## License
 

@@ -24,7 +24,7 @@ claude-plugins/
 
 - **Marketplace name**: `bernardorubin-tools` (set in `.claude-plugin/marketplace.json`)
 - **GitHub identifier**: `bernardorubin/claude-plugins` (used in `/plugin marketplace add`)
-- **Single plugin**: `br-tools` — bundles 6 slash commands, 4 skills (`pr-review`, `pr-description`, `write-slack-message`, `prd-to-jira`), and 1 subagent (`code-audit`)
+- **Single plugin**: `br-tools` — bundles 6 slash commands and 4 skills (`pr-review`, `pr-description`, `write-slack-message`, `prd-to-jira`). The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
 - **Install path** (after `/plugin install`): `~/.claude/plugins/cache/bernardorubin-tools/br-tools/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.

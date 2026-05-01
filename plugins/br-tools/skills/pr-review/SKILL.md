@@ -1,36 +1,48 @@
 ---
 name: pr-review
-description: PR review with parallel agents, confidence scoring, incremental tracking, and desktop file output
+description: Confidence-scored review with parallel agents, incremental tracking, and desktop file output. Three modes — (1) PR mode reviews a GitHub PR by number or auto-detected from the current branch. (2) Local mode reviews uncommitted changes plus commits ahead of main when no PR exists. (3) Full-repo mode reviews the entire codebase when the user explicitly asks for a full audit ("audit the whole repo", "review the entire codebase", "full repo audit"). Auto-triggers on phrases like "review this PR", "review my changes", "audit my code", "review my uncommitted work", "audit the whole repo".
 ---
 
 # PR Review
 
-Review code changes for quality, security vulnerabilities, performance issues, and adherence to best practices using parallel focused review agents with confidence-based filtering.
+Review code for quality, security vulnerabilities, performance issues, and adherence to best practices using parallel focused review agents with confidence-based filtering.
 
-**General-purpose PR review skill optimized for TypeScript/JavaScript projects.** Works with any language but includes specialized checks for React, Next.js, and TypeScript codebases. Agents automatically adapt — frontend-specific checks (re-renders, bundle size, a11y) are only flagged when relevant to the changed files.
+**General-purpose review skill optimized for TypeScript/JavaScript projects.** Works with any language but includes specialized checks for React, Next.js, and TypeScript codebases. Agents automatically adapt — frontend-specific checks (re-renders, bundle size, a11y) are only flagged when relevant to the changed files.
+
+## Modes
+
+| Mode | When | Input |
+|------|------|-------|
+| **PR** (default) | A PR number is provided OR auto-detected from the current branch | The PR's diff |
+| **Local** | No PR exists, OR user passes `--local`, OR user asks to "review my uncommitted changes" / "review my branch" | `git diff origin/<base>...HEAD` + uncommitted working tree |
+| **Full repo** | User passes `--full-repo`, OR explicitly asks for a "full repo audit" / "review the entire codebase" / "audit the whole repo" | Every source file in the repo (with sensible exclusions) |
 
 ## Arguments
 
-`$ARGUMENTS` - Optional PR number or URL, plus optional flags.
+`$ARGUMENTS` - Optional PR number/URL plus optional flags.
 
 **Examples:**
 
 ```
-/pr-review 463                          → full review, saved to ~/Desktop
-/pr-review 463 --lite                   → lightweight review (fewer agents, diff-only)
-/pr-review 463 --inline                 → full review, conversation output only (no file)
-/pr-review 463 --output ~/reviews       → full review, custom output directory
-/pr-review 463 --lite --inline          → combine flags freely
-/pr-review                              → auto-detect PR from current branch
+/pr-review 463                          → PR mode, full review, saved to ~/Desktop
+/pr-review 463 --lite                   → PR mode, lightweight (fewer agents, diff-only)
+/pr-review 463 --inline                 → PR mode, conversation output only (no file)
+/pr-review 463 --output ~/reviews       → PR mode, custom output directory
+/pr-review                              → Auto-detect PR from current branch (falls back to local mode if no PR)
+/pr-review --local                      → Force local mode (review branch diff vs main + uncommitted)
+/pr-review --full-repo                  → Full repo audit (every source file)
+/pr-review --full-repo --lite           → Full repo audit, lightweight
 ```
 
 ### Flags
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--lite` | Lightweight mode: 2 agents (sonnet), diff-only reads, no code snippets | Off (full mode) |
+| `--lite` | Lightweight: 2 agents (sonnet), diff-only reads, no code snippets | Off (full mode) |
 | `--inline` | Output review to conversation only, skip file output | Off (writes to file) |
 | `--output <path>` | Custom directory for review file output | `~/Desktop` |
+| `--local` | Force local mode (review uncommitted + branch diff vs main, ignore PRs) | Off (auto-detect) |
+| `--full-repo` | Audit the entire codebase, not a diff. Confirm with the user first if the repo has >50 source files. | Off |
 
 ### Model Behavior
 
@@ -41,26 +53,49 @@ This skill defaults to the user's currently active model. It does NOT override o
 ### Step 1: Parse Arguments
 
 Extract from `$ARGUMENTS`:
-1. **PR identifier** — a number (e.g., `463`), a URL, or empty (auto-detect)
-2. **Flags** — `--lite`, `--inline`, `--output <path>`
+1. **PR identifier** — a number (e.g., `463`), a URL, or empty
+2. **Flags** — `--lite`, `--inline`, `--output <path>`, `--local`, `--full-repo`
 
-Set defaults:
-- `mode` = `full` (unless `--lite` is present)
-- `output` = `file` (unless `--inline` is present)
-- `output_dir` = `~/Desktop` (unless `--output <path>` is present)
+Determine `source_mode`:
+- `--full-repo` present → `source_mode = "full-repo"`
+- `--local` present → `source_mode = "local"`
+- PR identifier present → `source_mode = "pr"`
+- Neither: try PR auto-detect first, fall back to `local` if no PR found
 
-### Step 2: Get PR Information
+Determine `review_mode` (depth):
+- `review_mode = "full"` (unless `--lite` is present, then `"lite"`)
 
-Try these in order until one works:
+Determine output:
+- `output = "file"` (unless `--inline` is present, then `"inline"`)
+- `output_dir = "~/Desktop"` (unless `--output <path>` overrides)
+
+### Step 2: Get Review Input
+
+Behavior depends on `source_mode`:
+
+#### PR mode
 
 1. **If PR identifier provided**: Run `gh pr view $PR --json files,baseRefName,headRefName,title,url,author,number` and `gh pr diff $PR`
 2. **If no identifier**: Run `gh pr view --json files,baseRefName,headRefName,title,url,author,number` and `gh pr diff` (auto-detects current branch's PR)
-3. **If both fail**: Fall back to local changes:
-   - Run `git diff --name-only` to see uncommitted changes
-   - Run `git diff HEAD~1 --name-only` if changes were just committed
-   - Use current branch name as the identifier
+3. **If both fail**: Switch to `source_mode = "local"` and follow that path below.
 
-Save the full diff output, the list of changed files, and PR metadata (title, number, branch, URL) for later.
+Save the full diff, list of changed files, and PR metadata (title, number, branch, URL).
+
+#### Local mode
+
+1. Determine the base branch: `git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'` (usually `main` or `master`).
+2. Get changed files: `git diff --name-only origin/<base>...HEAD` for committed changes ahead of base, plus `git diff --name-only` for uncommitted, plus `git diff --name-only --cached` for staged. Deduplicate.
+3. Get the diff: `git diff origin/<base>...HEAD` for committed delta, plus `git diff` for uncommitted, plus `git diff --cached` for staged. Concatenate.
+4. Capture metadata: current branch name (`git rev-parse --abbrev-ref HEAD`), base branch, repo name (`basename "$(git rev-parse --show-toplevel)"`).
+
+Use the branch name as the identifier for naming the output file.
+
+#### Full repo mode
+
+1. List every tracked source file: `git ls-files`. Apply the noise filter (Step 3) PLUS full-repo exclusions: `node_modules/`, `.next/`, `dist/`, `build/`, `.git/`, `coverage/`, `*.snap`, `**/__snapshots__/**`, `public/**` (binary assets), `*.png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|otf`, `*.min.js`, `*.map`.
+2. Count remaining files. **If >50 files: pause and ask the user to confirm before proceeding** (mention file count, est. token cost, and offer `--lite` as an alternative).
+3. Capture metadata: repo name (`basename "$(git rev-parse --show-toplevel)"`), current commit SHA (`git rev-parse --short HEAD`).
+4. There's no diff for full-repo mode — agents will read the files directly. Skip diff-based logic in later steps; agents review whole files.
 
 ### Step 3: Filter Noise Files
 
@@ -82,10 +117,16 @@ Read relevant CLAUDE.md files for project-specific standards.
 
 ### Step 5: Check for Prior Reviews (Incremental Mode)
 
-Look for an existing review file on the Desktop (or custom output dir) AND in the current conversation:
+Look for an existing review file on the Desktop (or custom output dir) AND in the current conversation. The filename pattern depends on `source_mode`:
 
-1. **Output file**: Look for `{output_dir}/pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` or `{output_dir}/pr-review-{branch-name}-{YYYY-MM-DD}.md`. Read it if it exists.
+- **PR**: `{output_dir}/pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md`
+- **Local**: `{output_dir}/pr-review-{branch-name}-{YYYY-MM-DD}.md`
+- **Full repo**: `{output_dir}/code-audit-{repo-name}-{YYYY-MM-DD}.md`
+
+1. **Output file**: Look for the pattern matching the current mode. Read it if it exists.
 2. **Conversation**: Scan for any prior `/pr-review` output (identifiable by `## Code Review` heading).
+
+Skip incremental tracking for full-repo mode if the prior file is older than 7 days (the codebase has likely shifted enough to warrant a fresh review).
 
 If a prior review is found (from either source):
 
@@ -100,13 +141,15 @@ This prevents re-flagging and enables incremental refinement of the same review 
 
 ### Step 6: Determine Review Strategy
 
-**Full mode** — based on the filtered PR size:
-- **Small PR (≤3 files changed, ≤150 lines diff)**: Review directly in the main conversation — no subagents needed. Apply the same confidence scoring and output format, covering all focus areas (core 4 + any triggered specialists).
-- **Medium/Large PR (>3 files or >150 lines diff)**: Launch **4 core agents** plus any triggered specialist agents (Step 7).
+**Full repo mode**: Always launch **4 core agents** in parallel (full review_mode) or **2 agents** (lite review_mode). Direct/inline review is never used for full-repo since scope is too large. Specialist agent triggers (Step 7) still apply, scanned across the file list.
 
-**Lite mode** — based on the filtered PR size:
-- **Small/Medium PR (≤8 files, ≤500 lines diff)**: Review directly in the main conversation. Cover all 4 areas in a single pass using the diff only. Read specific files only if you suspect a breaking change or need to check consumers of a modified export.
-- **Large PR (>8 files or >500 lines diff)**: Launch **2 parallel Sonnet agents** (Step 7).
+**PR/Local mode + full review_mode** — based on the filtered diff size:
+- **Small (≤3 files, ≤150 lines diff)**: Review directly in the main conversation — no subagents needed. Apply the same confidence scoring and output format, covering all focus areas (core 4 + any triggered specialists).
+- **Medium/Large (>3 files or >150 lines diff)**: Launch **4 core agents** plus any triggered specialist agents (Step 7).
+
+**PR/Local mode + lite review_mode** — based on the filtered diff size:
+- **Small/Medium (≤8 files, ≤500 lines diff)**: Review directly in the main conversation. Cover all 4 areas in a single pass using the diff only. Read specific files only if you suspect a breaking change or need to check consumers of a modified export.
+- **Large (>8 files or >500 lines diff)**: Launch **2 parallel Sonnet agents** (Step 7).
 
 Additionally (both modes), scan the diff for **specialized review triggers**:
 - **Silent failures**: If the diff contains `try`/`catch`, `.catch(`, `|| fallback`, or error handling changes → trigger Agent 5
@@ -119,9 +162,11 @@ These specialist agents run **in addition to** the core agents when triggered. T
 
 Using the Task tool, launch agents in parallel with `subagent_type: feature-dev:code-reviewer`.
 
-**Full mode**: Launch **4 core agents**. Pass each agent: the path to the diff file, list of changed files, project standards from CLAUDE.md, and the "Already Fixed" list (if any from Step 5).
+**Full review_mode**: Launch **4 core agents**. Pass each agent: the path to the diff file (or full file list for full-repo mode), the list of files in scope, project standards from CLAUDE.md, the current `source_mode`, and the "Already Fixed" list (if any from Step 5).
 
-**Lite mode**: Launch **2 agents** with `model: sonnet`. Pass each agent: the path to the diff file, the filtered file list, and the brief conventions summary (not the full CLAUDE.md).
+**Lite review_mode**: Launch **2 agents** with `model: sonnet`. Pass each agent: the path to the diff file (or full file list), the filtered file list, the source_mode, and the brief conventions summary (not the full CLAUDE.md).
+
+**For full-repo source_mode**: Tell agents to read the listed files directly (no diff exists). Each agent should still apply confidence scoring, but findings are ranked by impact relative to the whole codebase rather than the changes-of-interest framing used in PR/local modes.
 
 ---
 
@@ -266,9 +311,10 @@ After all agents complete (or after direct review for small PRs):
 
 **Otherwise**: Write the consolidated review to a markdown file.
 
-**File path**: `{output_dir}/pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md`
-- If PR number is available: `pr-review-69-2026-02-10.md`
-- If no PR number (local changes): `pr-review-{branch-name}-{YYYY-MM-DD}.md`
+**File path** depends on `source_mode`:
+- **PR mode**: `{output_dir}/pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` (e.g. `pr-review-69-2026-02-10.md`)
+- **Local mode**: `{output_dir}/pr-review-{branch-name}-{YYYY-MM-DD}.md`
+- **Full repo mode**: `{output_dir}/code-audit-{repo-name}-{YYYY-MM-DD}.md` (e.g. `code-audit-happy-checkout-sk-2026-05-01.md`)
 
 **If the file already exists (re-run / incremental review):**
 
