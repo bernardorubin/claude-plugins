@@ -1,6 +1,6 @@
 {
-  "name": "prd-to-jira",
-  "description": "Break down a PRD, spec, or feature document into a Jira epic with well-structured, right-sized tickets organized by work area. Includes both the slash command and the underlying skill.",
+  "name": "br-tools",
+  "description": "Bernardo's personal toolkit: git workflow shortcuts, PR helpers, Claude meta commands, and integrations (Slack, Jira). Includes 8 slash commands and the prd-to-jira skill.",
   "version": "1.0.0",
   "author": {
     "name": "Bernardo Rubin",

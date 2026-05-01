@@ -23,112 +23,14 @@
       }
     },
     {
-      "name": "claude-learn",
+      "name": "br-tools",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/claude-learn",
+        "path": "plugins/br-tools",
         "ref": "main"
       },
-      "description": "Review the current session and document valuable learnings to CLAUDE.md files, making future Claude sessions smarter.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "claude-modularize",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/claude-modularize",
-        "ref": "main"
-      },
-      "description": "Break down a large, monolithic CLAUDE.md file into smaller, maintainable pieces distributed across the project's directory structure.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "git-acp",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/git-acp",
-        "ref": "main"
-      },
-      "description": "Stage all changes, generate a commit message from the diff, commit, and push to remote in one step.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "git-pull-reapply",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/git-pull-reapply",
-        "ref": "main"
-      },
-      "description": "Bring the current branch up to date with remote while preserving local work — handles clean trees, uncommitted changes, and divergent branches via stash and rebase.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "pr-description",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/pr-description",
-        "ref": "main"
-      },
-      "description": "Generate a GitHub-ready PR description from the diff and update the PR directly on GitHub. Falls back to saving to Desktop if the GitHub update fails.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "prd-to-jira",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/prd-to-jira",
-        "ref": "main"
-      },
-      "description": "Break down a PRD, spec, or feature document into a Jira epic with well-structured, right-sized tickets organized by work area. Includes both the slash command and the underlying skill.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "save-session-to-worklog",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/save-session-to-worklog",
-        "ref": "main"
-      },
-      "description": "Log the current session's work into a monthly worklog on the Desktop (e.g., april-2026-happy-worklog.md). For standups and invoicing — not git history. Auto-detects the project.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "write-slack-message",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/write-slack-message",
-        "ref": "main"
-      },
-      "description": "Write a Slack message ready to copy-paste, with proper formatting and a business-casual tone.",
+      "description": "Bernardo's personal toolkit: git workflow shortcuts, PR helpers, Claude meta commands, and integrations (Slack, Jira). Includes 8 slash commands and the prd-to-jira skill.",
       "version": "1.0.0",
       "author": {
         "name": "Bernardo Rubin"
